@@ -14,8 +14,9 @@
 .scene-art{min-height:250px;perspective:900px;position:relative;overflow:hidden;border-radius:16px;background:radial-gradient(ellipse at 50% 22%,#365a70 0,#1a3045 60%,#122237 100%);border:1px solid #35516b}
 .city3d{position:relative;width:100%;height:250px;perspective:850px;perspective-origin:50% 42%;overflow:hidden;touch-action:pan-y;cursor:grab}
 .city3d:active{cursor:grabbing}
-.city3d-world{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateX(58deg) rotateZ(-28deg) scale(.78) translateY(10px);transition:transform .35s ease}
-.city3d.is-turned .city3d-world{transform:rotateX(58deg) rotateZ(-10deg) scale(.78) translateY(10px)}
+.city3d-world{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateX(58deg) rotateZ(var(--scene-angle,-28deg)) scale(.78) translateY(10px);transition:transform .18s ease}
+.city3d.is-dragging .city3d-world{transition:none}
+.city3d.is-turned{--scene-angle:-10deg}
 .city3d-ground{position:absolute;width:350px;height:245px;left:50%;top:50%;transform:translate(-50%,-50%) translateZ(-14px);background:linear-gradient(135deg,#244653,#1b3744);border:1px solid #50717c;box-shadow:0 24px 0 #0c1c2b;border-radius:8px}
 .city3d-road{position:absolute;width:370px;height:86px;left:50%;top:54%;transform:translate(-50%,-50%) translateZ(1px);background:linear-gradient(90deg,#334757,#263746);border-top:3px solid #718897;border-bottom:3px solid #718897;box-shadow:0 8px 0 #152b3b}
 .city3d-road:before{content:"";position:absolute;left:0;right:0;top:50%;border-top:3px dashed #d9cfa5}
@@ -41,7 +42,7 @@
 .scene-controls{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
 .scene-control{border:1px solid #35516b;border-radius:8px;padding:6px 9px;background:#1a3045;color:#dbeaf5;font-size:11px}
 .scene-control:hover{border-color:#8ed8ff}
-@media(max-width:760px){.scene-art{min-height:230px}.city3d{height:230px}.city3d-world{transform:rotateX(58deg) rotateZ(-28deg) scale(.69) translateY(8px)}.city3d.is-turned .city3d-world{transform:rotateX(58deg) rotateZ(-10deg) scale(.69) translateY(8px)}}
+@media(max-width:760px){.scene-art{min-height:230px}.city3d{height:230px}.city3d-world{transform:rotateX(58deg) rotateZ(-28deg) scale(.69) translateY(8px)}.city3d.is-turned{--scene-angle:-10deg}}
 @media(prefers-reduced-motion:reduce){.city3d-world,.scene-hotspot{transition:none}}
 \n@media(max-width:760px){.wrap{width:min(100% - 28px,var(--max))}.nav{height:64px}.nav-tag{display:none}.hero{padding:50px 0 28px;grid-template-columns:1fr;gap:28px}.hero-art{min-height:250px}.stats{margin-bottom:48px;gap:8px}.stat{padding:12px}.stat b{font-size:12px}.stat span{font-size:11px}.section-head{align-items:start;flex-direction:column;gap:8px}.grid{grid-template-columns:1fr}.world-card{min-height:190px}.play-head{padding:20px;align-items:start}.play-head h2{font-size:22px}.play-body{grid-template-columns:1fr}.scene{border-right:0;border-bottom:1px solid var(--line);padding:22px;gap:15px}.scene-art{min-height:100px}.choices{padding:22px}.process-grid{grid-template-columns:1fr}.process-card{padding:17px}h1{font-size:48px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
@@ -73,8 +74,8 @@
 <button class="scene-hotspot" data-inspect="office" type="button">Local office</button><button class="scene-hotspot" data-inspect="road" type="button">Inspect road</button><button class="scene-hotspot" data-inspect="agency" type="button">Road agency</button>
 </div>
 <div class="scene-insight" id="scene-insight" aria-live="polite"><strong>Explore the scene</strong>Select a hotspot to discover what it tells you.</div>
-<div class="scene-controls"><button class="scene-control" id="scene-rotate" type="button">Rotate view ↻</button><button class="scene-control" id="scene-reset" type="button">Reset view</button></div>
-</div><div><div class="scene-label">The situation</div><h3>A road in your neighbourhood is full of potholes.</h3><p>Residents want repairs. But before anyone can fix it, you need to find out which authority is responsible for maintaining this particular road.</p></div></div><div class="choices"><h3 id="question">What should you do first?</h3><p class="hint" id="question-hint">Choose the most useful first step.</p><div class="choice-list" id="choice-list"><button class="choice" data-choice="municipality"><span class="choice-letter">A</span><span>Contact the municipal corporation immediately.</span></button><button class="choice" data-choice="state"><span class="choice-letter">B</span><span>Contact the state government.</span></button><button class="choice" data-choice="central"><span class="choice-letter">C</span><span>Contact the central government.</span></button><button class="choice" data-choice="identify"><span class="choice-letter">D</span><span>Identify which authority manages the road first.</span></button></div><div class="result hidden" id="result" aria-live="polite"><h4 id="result-title"></h4><p id="result-copy"></p><div class="takeaway" id="result-takeaway"></div><button class="btn next" id="next-btn">Continue the scenario →</button></div></div></div></div>
+<div class="scene-controls"><button class="scene-control" id="scene-rotate" type="button">Rotate view ↻</button><button class="scene-control" id="scene-reset" type="button">Reset view</button><span class="scene-control" aria-hidden="true">Drag scene to look around</span></div>
+</div><div><div class="scene-label">The situation</div><h3 id="scene-title">A road in your neighbourhood is full of potholes.</h3><p>Residents want repairs. But before anyone can fix it, you need to find out which authority is responsible for maintaining this particular road.</p></div></div><div class="choices"><h3 id="question">What should you do first?</h3><p class="hint" id="question-hint">Choose the most useful first step.</p><div class="choice-list" id="choice-list"><button class="choice" data-choice="municipality"><span class="choice-letter">A</span><span>Contact the municipal corporation immediately.</span></button><button class="choice" data-choice="state"><span class="choice-letter">B</span><span>Contact the state government.</span></button><button class="choice" data-choice="central"><span class="choice-letter">C</span><span>Contact the central government.</span></button><button class="choice" data-choice="identify"><span class="choice-letter">D</span><span>Identify which authority manages the road first.</span></button></div><div class="result hidden" id="result" aria-live="polite"><h4 id="result-title"></h4><p id="result-copy"></p><div class="takeaway" id="result-takeaway"></div><button class="btn next" id="next-btn">Continue the scenario →</button></div></div></div></div>
 </section>
 <section class="process" aria-labelledby="method-title"><div class="section-head"><div><div class="eyebrow">How learning works</div><h2 id="method-title">Learn by following the chain</h2></div><p>One question leads to the next, revealing how institutions connect instead of presenting isolated facts.</p></div><div class="process-grid"><article class="process-card"><span class="num">01 / NOTICE</span><h3>Start with a real problem</h3><p>A road needs repairs, an election is approaching, or a new law is proposed.</p></article><article class="process-card"><span class="num">02 / INVESTIGATE</span><h3>Make a decision</h3><p>Choose a path, test your assumptions and see the consequences.</p></article><article class="process-card"><span class="num">03 / CONNECT</span><h3>See the bigger picture</h3><p>Understand who has authority, how decisions are funded and where accountability sits.</p></article></div></section>
 <div class="note"><strong>Accuracy matters.</strong> Government responsibilities can vary by state, local body, road classification and specific agency. Scenarios will explain those distinctions rather than imply that every situation has one universal answer.</div>
@@ -110,9 +111,32 @@ document.querySelectorAll("[data-inspect]").forEach(button=>button.addEventListe
  $("scene-insight").innerHTML="<strong>"+note.title+"</strong>"+note.body;
  document.querySelectorAll("[data-inspect]").forEach(b=>b.style.borderColor=b===button?"#9de2bd":"");
 }));
-$("scene-rotate").addEventListener("click",()=>{$("city3d").classList.toggle("is-turned")});
+const city=$("city3d");
+let sceneAngle=-28,dragStartX=0,dragStartAngle=-28,dragPointer=null;
+function setSceneAngle(angle){
+ sceneAngle=Math.max(-58,Math.min(18,angle));
+ city.style.setProperty("--scene-angle",sceneAngle+"deg");
+ city.classList.toggle("is-turned",sceneAngle>-18);
+}
+city.addEventListener("pointerdown",event=>{
+ if(event.target.closest("button"))return;
+ dragPointer=event.pointerId;dragStartX=event.clientX;dragStartAngle=sceneAngle;
+ city.classList.add("is-dragging");
+ if(city.setPointerCapture)city.setPointerCapture(event.pointerId);
+});
+city.addEventListener("pointermove",event=>{
+ if(dragPointer!==event.pointerId)return;
+ setSceneAngle(dragStartAngle+(event.clientX-dragStartX)*.22);
+});
+function stopSceneDrag(event){
+ if(dragPointer!==event.pointerId)return;
+ dragPointer=null;city.classList.remove("is-dragging");
+}
+city.addEventListener("pointerup",stopSceneDrag);
+city.addEventListener("pointercancel",stopSceneDrag);
+$("scene-rotate").addEventListener("click",()=>setSceneAngle(sceneAngle<-18?-10:-28));
 $("scene-reset").addEventListener("click",()=>{
- $("city3d").classList.remove("is-turned");
+ setSceneAngle(-28);
  $("scene-insight").innerHTML="<strong>Explore the scene</strong>Select a hotspot to discover what it tells you.";
  document.querySelectorAll("[data-inspect]").forEach(b=>b.style.borderColor="");
 });
